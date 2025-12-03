@@ -7,13 +7,14 @@ def get_max_of_bank_with_remainder(bank, required_remainder)
   [max, bank[index+1..-1]]
 end
 
+total_number_of_batteries_to_turn_on = 12
+
 result = banks.map do |bank|
-  first_battery_value, remaining_bank = get_max_of_bank_with_remainder(bank, 1)
-  second_battery_value, _ = get_max_of_bank_with_remainder(remaining_bank, 0)
-  (first_battery_value + second_battery_value).to_i
+  (0..total_number_of_batteries_to_turn_on - 1).to_a.reverse.reduce(['', bank]) do |accum, number_of_batteries_to_turn_on|
+    total, remaining_bank = accum
+    battery_value, new_remaining_bank = get_max_of_bank_with_remainder(remaining_bank, number_of_batteries_to_turn_on)
+    [total + battery_value, new_remaining_bank]
+  end.first.to_i
 end.sum
 
-puts result
-raise "#{result} does not equal 17095" unless result === 17095
-
-
+puts "Result: #{result}"
