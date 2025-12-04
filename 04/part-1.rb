@@ -7,6 +7,6 @@ result = grid.map do |contents, point|
   contents == "@" && grid.count_adjacent_rolls(point) < 4 ? 'x' : contents
 end
 
-accessible_rolls_count = result.flatten.count {|contents| contents == 'x' }
+accessible_rolls_count = result.contents.flatten.count {|contents| contents == 'x' }
 
 puts "Result: #{accessible_rolls_count}"
