@@ -2,19 +2,11 @@ class Start < Struct.new(:value)
   def start?
     true
   end
-
-  def finish?
-    false
-  end
 end
 
 class Finish < Struct.new(:value)
   def start?
     false
-  end
-
-  def finish?
-    true
   end
 end
 
@@ -44,24 +36,23 @@ stack = []
 simplified_markers = []
 
 sorted_markers.each do |marker, index|
-  if stack.empty? && marker.start?
+  if marker.start?
+    if stack.empty? # empty stack means a start marks beginning of a range.
+      simplified_markers.push(marker)
+    end
     stack.push(marker)
-    simplified_markers.push(marker)
-  elsif marker.start?
-    stack.push(marker)
-  elsif stack.length == 1 && marker.finish?
-    simplified_markers.push(marker)
-    stack.pop
-  elsif marker.finish?
+  else
+    if stack.length == 1 # stack has only 1 start, so finish marks end of a range.
+      simplified_markers.push(marker)
+    end
     stack.pop
   end
 end
 
 range_sizes = simplified_markers.each_slice(2).map do |markers|
   start, finish = markers
-  (finish.value - start.value) + 1
+  (finish.value - start.value) + 1 # add one as range is inclusive
 end
 
+# 343329651880509
 puts "Result: #{range_sizes.sum}"
-
-
