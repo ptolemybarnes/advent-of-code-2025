@@ -67,8 +67,14 @@ def render_splits(line)
   end
 end
 
+def count_number_of_splits(manifold)
+  manifold.flatten.count do |element|
+    element.is_a?(Splitter) && element.activated?
+  end
+end
 
-input = File.readlines('test-input.txt').map(&:chomp)
+
+input = File.readlines('input.txt').map(&:chomp)
 
 parsed_manifold = input.map do |line|
   line.split('').map do |element|
@@ -117,6 +123,7 @@ end
 
 
 print_manifold(rendered_lines)
+puts "Result: #{count_number_of_splits(rendered_lines)}"
 
 # split the lines into a 2d array
 # Start with the first line. The goal is to render the next line.
