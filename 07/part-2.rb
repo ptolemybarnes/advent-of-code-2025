@@ -1,6 +1,4 @@
-
-
-
+require './point.rb'
 
 class Element
   def empty?
@@ -45,6 +43,40 @@ class EmptySpace < Element
   end
 end
 
+class Manifold
+  attr_reader :contents
+
+  def initialize(contents)
+    @contents = contents
+  end
+
+  def get_at(point)
+    if contents[point.y]
+      return contents[point.y][point.x]
+    end
+    return nil
+  end
+
+  def get_index_of_entrance
+    Point.new(contents[0].find_index {|element| element.is_a? Entrance }, 0)
+  end
+end
+
+class Cache
+  def initialize
+    @contents = {}
+  end
+
+  def write(point, total)
+    @contents[point] = total
+    puts "Cache size: #{@contents.size}"
+  end
+
+  def get(point)
+    @contents[point]
+  end
+end
+
 def print_manifold(manifold)
   result = manifold.map do |line|
     (line || []).map(&:to_s).join
@@ -70,7 +102,7 @@ def render_splits(line)
   end
 end
 
-input = File.readlines('test-input.txt').map(&:chomp)
+input = File.readlines('input.txt').map(&:chomp)
 
 parsed_manifold = input.map do |line|
   line.split('').map do |element|
@@ -117,5 +149,35 @@ until parsed_manifold.empty?
   rendered_lines.push(rendered_line)
 end
 
+@cache = Cache.new
 
-print_manifold(rendered_lines)
+def follow_tychon_beam(manifold, point)
+  element = manifold.get_at(point)
+  if element.is_a?(TychonBeam) || element.is_a?(Entrance)
+    return follow_tychon_beam(manifold, point.south)
+  end
+  return element, point
+end
+
+def count_timelines(manifold, position, total = 0)
+  next_element, position = follow_tychon_beam(manifold, position)
+  if cache_contents = @cache.get(position)
+    return cache_contents
+  end
+  if next_element.nil?
+    return 1
+  end
+  if !(next_element.is_a?(Splitter) && next_element.activated?)
+    return 0
+  end
+  if next_element.is_a?(Splitter) && next_element.activated?
+    result = count_timelines(manifold, position.west, total) + count_timelines(manifold, position.east, total)
+    @cache.write(position, result)
+    return result
+  end
+  raise "Unknown: #{next_element}"
+end
+
+manifold = Manifold.new(rendered_lines)
+starting_position = manifold.get_index_of_entrance
+puts "Number of timelines: #{count_timelines(manifold, starting_position)}"
