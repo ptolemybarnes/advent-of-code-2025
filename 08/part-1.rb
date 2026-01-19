@@ -39,14 +39,10 @@ class JunctionBox
   attr_reader :x, :y, :z
 end
 
-def get_closest_pair_that_are_not_connected(_boxes)
-  _boxes.product(_boxes).min_by do |pair|
+def get_closest_pair_that_are_not_connected(pairs)
+  pairs.find do |pair|
     a, b = pair
-    if a == b || a.connected?(b)
-      Float::INFINITY
-    else
-      a.distance_to(b)
-    end
+    !(a == b || a.connected?(b))
   end
 end
 
@@ -54,9 +50,14 @@ boxes = File.readlines("./input.txt").map do |line|
   JunctionBox.new(*line.split(',').map(&:to_i))
 end
 
+box_pairs_sorted_by_distance = boxes.product(boxes).sort_by do |pair|
+  a, b = pair
+  a.distance_to(b)
+end
+
 1000.times do |i|
   puts "Iteration: #{i}"
-  box_a, box_b = get_closest_pair_that_are_not_connected(boxes)
+  box_a, box_b = get_closest_pair_that_are_not_connected(box_pairs_sorted_by_distance)
   box_a.connect(box_b)
 end
 
